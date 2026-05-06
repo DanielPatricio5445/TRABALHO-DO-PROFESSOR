@@ -1,0 +1,26 @@
+Vunerabilidade no admin_excluir_vulneravel:
+
+// O ERRO FATAL:
+$sql = "DELETE FROM produtos WHERE id = $id";
+
+Novamente, o valor de $id (vido do $_POST) é injetado diretamente no comando SQL sem nenhuma proteção ou aspas. Isso transforma uma ferramenta de administração em uma arma de destruição de dados.
+ 
+Como Corrigir:
+<?php
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $id = $_POST["id"];
+
+    // 1. Preparamos o comando
+    $stmt = $conn->prepare("DELETE FROM produtos WHERE id = ?");
+    
+    // 2. Vinculamos como inteiro "i" (proteção extra contra textos maliciosos)
+    $stmt->bind_param("i", $id);
+    
+    // 3. Executamos com segurança
+    if ($stmt->execute()) {
+        echo "<div class='resultado sucesso'>Produto excluído com sucesso (simulado).</div>";
+    }
+    
+    $stmt->close();
+}
+?>
